@@ -7,5 +7,6 @@
 *.png
 *.PNG
 *.csv
+*.pyc
 WLASL_tools
 data
