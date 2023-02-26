@@ -8,7 +8,6 @@ METADATA_PATH = os.path.join(BASE_PATH, 'WLASL_v0.3.json')
 
 # define the path to the base output directory
 BASE_OUTPUT = "output"
-
 # Define the path to the output serialized model
 MODEL_PATH = os.path.join(BASE_OUTPUT, "sign_detector.h5")
 #PLOT_PATH = os.path.sep.join([BASE_OUTPUT, "plot.png"])
