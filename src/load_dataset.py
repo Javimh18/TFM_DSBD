@@ -93,7 +93,7 @@ def detect_pose(image, model):
     image.flags.writeable = True
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     results = model.process(image)
-    return image, results
+    return image, results   
 
 def load_and_transform_dataset(indexfile='data/WLASL_v0.3.json', vid_directory='data/videos', top_k = 200):
     content = json.load(open(indexfile))
