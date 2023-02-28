@@ -10,3 +10,4 @@
 *.pyc
 WLASL_tools
 data
+__pycache__

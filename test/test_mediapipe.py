@@ -17,6 +17,12 @@ def mediapipe_detection(image, model):
     return image, results
 
 def draw_styled_landmarks(image, results):
+
+    # Draw face-mesh connections
+    mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACEMESH_TESSELATION,
+                             mp_drawing.DrawingSpec(color=(80,22,10), thickness=2, circle_radius=1), 
+                             mp_drawing.DrawingSpec(color=(80,44,121), thickness=2, circle_radius=.5)
+                             ) 
     # Draw pose connections
     mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS,
                              mp_drawing.DrawingSpec(color=(80,22,10), thickness=2, circle_radius=1), 
@@ -59,16 +65,15 @@ def test_mediapipe_live():
         cv2.destroyAllWindows()
 
 def test_mediapipe_video():
-    video_path = '../data/videos/47614.mp4'
+    video_path = '../data/videos/00335.mp4'
     cap = cv2.VideoCapture(video_path)
     fps = cap.get(cv2.CAP_PROP_FPS)
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    # total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     fourCC = cv2.VideoWriter_fourcc('M','J','P','G')
     out = cv2.VideoWriter('mp_test.mp4', fourCC, fps, (frame_width,frame_height))
-
 
     counter = 0
     # declaration of the holistic model in media pipe

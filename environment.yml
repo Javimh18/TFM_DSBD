@@ -23,3 +23,4 @@ dependencies:
     - scikit-optimize==0.9.0
     - mediapipe
     - opencv-python==4.7.0.72
+    - six

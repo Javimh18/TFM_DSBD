@@ -9,11 +9,23 @@ import config
 import os
 import mediapipe as mp
 import pandas as pd
+from mp_funs import extract_landmarks_to_np
+from six.moves import cPickle as pickle #for performance
 
 EXTENSION = '.mp4'
 SPLITS = ['train', 'val', 'test']
+
 mp_holistic = mp.solutions.holistic # Holistic model
 mp_drawing = mp.solutions.drawing_utils # Drawing utilities that will be useful for action representation
+
+def save_dict(di_, filename_):
+    with open(filename_, 'wb') as f:
+        pickle.dump(di_, f)
+
+def load_dict(filename_):
+    with open(filename_, 'rb') as f:
+        ret_di = pickle.load(f)
+    return ret_di
 
 def rm_error_info(func, path, _):
     print("INFO: The path", path, "does not exist. Skipping...")
@@ -86,40 +98,50 @@ def organize(indexfile='data/WLASL_v0.3.json', vid_directory='data/videos', top_
 
     return gloss_rank
 
-def detect_pose(image, model):
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    image.flags.writeable = False
-    results = model.process(image)
-    image.flags.writeable = True
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-    results = model.process(image)
-    return image, results   
-
-def load_and_transform_dataset(indexfile='data/WLASL_v0.3.json', vid_directory='data/videos', top_k = 200):
+def load_transform_save_dataset(indexfile='data/WLASL_v0.3.json', vid_directory='data/videos', top_k = 200):
     content = json.load(open(indexfile))
 
     org_gloss_rank = organize(indexfile, vid_directory, top_k = 200)
 
-    frames = []
-    labels = []
+    segmented_dataset = {}
     holistic_model_mp = mp_holistic.Holistic()
 
     for sp in SPLITS:
+        segmented_dataset[sp] = []
         for gloss in org_gloss_rank.keys():
-            for video in os.listdir(os.join.path(config.VIDEOS_PATH, sp, gloss)):
-                cap = cv2.VideoCapture(os.join.path(config.VIDEOS_PATH, sp, gloss, video))
-                fps = cap.get(cv2.CAP_PROP_FPS)
-                total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            for video_path in os.listdir(os.join.path(config.VIDEOS_PATH, sp, gloss)):
+                cap = cv2.VideoCapture(video_path)
 
-                # once we've got the fps and the total_frames of the video
-                # we create a numpy array and iterate in it with the frame rate defined
-                frame_idx = np.arange(0, total_frames, fps)
+                # declaration of the holistic model in media pipe
+                with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
+                    video_as_landmarks = np.array([])
+                    # Loop until the end of the video
+                    while (cap.isOpened()):
+                        # Capture frame by frame
+                        ret, frame = cap.read()
+                        if ret:
+                            # Make detections
+                            results = holistic.process(frame)
+                            if results is None:
+                                print("Something is wrong w/ mediapipe... Exiting.")
+                                cap.release()
+                                return
+                            
+                            # Once we get the landmarks, we insert them in a numpy array
+                            # There are 4 landmarks that we are interested in: face-mesh pose, rigth-hand and left-hand 
+                            # so we are going to extract the from the holistic process method
+
+                            video_as_landmarks = np.append(video_as_landmarks, extract_landmarks_to_np(results))
+
+                    cap.release()
                 
-                for idx in frame_idx:
-                    cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
-                    ret, frame = cap.read()
-                    if not ret:
-                        continue
+            segmented_dataset[sp].append((video_as_landmarks, gloss))
+    
+    # with all correctly stored, we save the file in a pickl file.
+    save_dict(segmented_dataset, 'data/npy_videos/npy_db.pkl')
 
-                    # Now we pass it to mp_detect_pose, that captures the left and right hand posture plus the pose
-                    image, results = detect_pose(frame, holistic_model_mp)
+    return segmented_dataset
+
+
+if __name__ == '__main__':
+    load_transform_save_dataset()
