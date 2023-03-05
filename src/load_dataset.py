@@ -13,7 +13,8 @@ from utils import save_dict, load_dict
 
 EXTENSION = '.mp4'
 SPLITS = ['train', 'val', 'test']
-PICK_FILE_PATH = 'data/npy_videos/npy_db.pkl'
+X_PICK_FILE_PATH = 'data/npy_videos/npy_db_x.pkl'
+Y_PICK_FILE_PATH = 'data/npy_videos/npy_db_y.pkl'
 
 mp_holistic = mp.solutions.holistic # Holistic model
 mp_drawing = mp.solutions.drawing_utils # Drawing utilities that will be useful for action representation
@@ -29,8 +30,12 @@ def gloss_ranking(content, vid_directory, top_k):
         appereances = []
         for split in SPLITS:
             path_to_check = os.path.join(vid_directory, split, gloss)
-            items = os.listdir(path_to_check)
-            appereances.append(len(items))
+            # If there is a gloss that does not appear in a split, we skip it
+            try:
+                items = os.listdir(path_to_check)
+                appereances.append(len(items))
+            except OSError:
+                appereances.append(0)
 
         # we add up all the videos from each split, given a gloss
         ranking[gloss] = sum(appereances)
@@ -89,7 +94,7 @@ def organize(indexfile='data/WLASL_v0.3.json', vid_directory='data/videos', top_
 
     return gloss_rank
 
-def load_transform_save_dataset(indexfile='data/WLASL_v0.3.json', vid_directory='data/videos', top_k=200):
+def load_transform_save_dataset(indexfile='data/WLASL_v0.3.json', vid_directory='data/videos', top_k=200, save=False):
 
     # TODO: error handling in case the user specifies more top_k than glosses available 
 
@@ -98,58 +103,78 @@ def load_transform_save_dataset(indexfile='data/WLASL_v0.3.json', vid_directory=
 
     print("Folders arranged, applying mediapipe transformations to the dataset...")
 
-    segmented_dataset = {}
-
+    X = {}
+    Y = {}
     # declaration of the holistic model in media pipe
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         # we iterate through the folders
         for sp in SPLITS:
-            segmented_dataset[sp] = []
+            video_labels = []
+            landmarks_from_videos = []
             for gloss in org_gloss_rank.keys():
-                video_as_landmarks = []
+                # Iteration over each video
                 for video_path in os.listdir(os.path.join(config.VIDEOS_PATH, sp, gloss)):
+                    video_landmarks = []
                     cap = cv2.VideoCapture(os.path.join(config.VIDEOS_PATH, sp, gloss, video_path))
                     # Loop until the end of the video
-                    while cap.isOpened():
-                        # Capture frame by frame
+                    counter = 0
+                    ret = True
+                    while ret:
                         ret, frame = cap.read()
                         if ret:
-                            # Make detections
+                            # There are 4 landmarks that we are interested in: face-mesh, pose, rigth-hand and left-hand 
+                            # so we are going to extract them with the holistic process method
                             results = holistic.process(frame)
                             if results is None:
                                 print("Something is wrong w/ mediapipe... Exiting.")
                                 cap.release()
                                 return
                             
-                            # Once we get the landmarks, we insert them in a numpy array
-                            # There are 4 landmarks that we are interested in: face-mesh, pose, rigth-hand and left-hand 
-                            # so we are going to extract the from the holistic process method
-                            video_as_landmarks.append(extract_landmarks_to_np(results))
+                            # Once we get the landmarks, we insert them in an array
+                            video_landmarks.append(extract_landmarks_to_np(results))
+                            counter += 1
 
-                        cap.release()
-                segmented_dataset[sp].append((video_as_landmarks, gloss))
+                    cap.release()
+                    # with all the frames landmarks extracted (videos), we append them 
+                    # to a list of video landmarks
+                    landmarks_from_videos.append(video_landmarks)
+                    video_labels.append(gloss)
+                print("INFO: ", gloss, "label processed for", sp, "split")
+            
+            X[sp] = landmarks_from_videos
+            Y[sp] = video_labels
             print("INFO: ", sp, "split processed.")
     
-    # with all correctlay stored, we save the file in a pickl file.
-    print("Data stored in dictionry, saving in pickel file under data/npy_videos folder...")
-    save_dict(segmented_dataset, PICK_FILE_PATH)
-    print("Data saved in path:", PICK_FILE_PATH)
+    if save:
+        # with all correctly stored, we save the file in a pickl file.
+        print("Data stored in dictionary, saving in pickel file under data/npy_videos folder...")
+        save_dict(X, X_PICK_FILE_PATH)
+        save_dict(Y, Y_PICK_FILE_PATH)
 
     print("Removing the auxiliar folders...")
     for sp in SPLITS:
         shutil.rmtree(os.path.join(config.VIDEOS_PATH, sp), onerror=rm_error_info)
         print(os.path.join(config.VIDEOS_PATH, sp), "removed.")
 
-    return segmented_dataset
+    return X, Y
 
 
 if __name__ == '__main__':
-    # load_transform_save_dataset(top_k=20)
     
-    dict_pck = load_dict(PICK_FILE_PATH)
-
-    val_split = dict_pck['val']
-
-    print("Video:", val_split[0][0])
-    print("Label:", val_split[0][1])
+    load = False
+    if load:
+        X, Y = load_transform_save_dataset(top_k=20, save=True)
+    else:
+        X = load_dict(X_PICK_FILE_PATH)
+        Y = load_dict(Y_PICK_FILE_PATH)
     
+    X_train = X['train']
+    X_test = X['test']
+    X_val = X['val']
+
+    Y_train = Y['train']
+    Y_test = Y['test']
+    Y_val = Y['val']
+
+    print("X_train: ", X_train[0])
+    print("Y_train: ", Y_train[0])

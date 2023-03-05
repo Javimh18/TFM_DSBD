@@ -46,8 +46,6 @@ def extract_right_hand_landmarks(results):
                                             if results.right_hand_landmarks\
                                             else np.zeros(HAND_LANDMARKS) 
                     
-    
-
 def extract_left_hand_landmarks(results):
     return np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten()\
                                             if results.left_hand_landmarks\
