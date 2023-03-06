@@ -8,8 +8,10 @@ import cv2
 import config
 import os
 import mediapipe as mp
-from mp_funs import extract_landmarks_to_np
+import torch
+from mp_funs import extract_landmarks_to_np, FACEMESH_LANDMARKS, POSE_LANDMARKS, HAND_LANDMARKS
 from utils import save_dict, load_dict
+from math import floor
 
 EXTENSION = '.mp4'
 SPLITS = ['train', 'val', 'test']
@@ -94,6 +96,48 @@ def organize(indexfile='data/WLASL_v0.3.json', vid_directory='data/videos', top_
 
     return gloss_rank
 
+
+def from_dict_to_tensor(X):
+
+    max_len = -10e8
+    n_frame_lm = FACEMESH_LANDMARKS + POSE_LANDMARKS + 2*HAND_LANDMARKS
+
+    for sp in SPLITS:
+        split = X[sp]
+        for video in split:
+            cur_len = len(video)
+            if cur_len > max_len:
+                max_len = cur_len
+
+    # once we got the max_len, we expland the videos to match the frames
+    for sp in SPLITS:
+        split = X[sp]
+        for video in split:
+            diff = len(video) - max_len
+            if diff != 0:
+                if diff % 2 != 0:
+                    # insert at the end of the list
+                    for i in range(0, floor(diff/2)):
+                        video.append(np.zeros(n_frame_lm))
+                    
+                    # insert at the beginning of the list
+                    for i in range(0, floor(diff/2)+1):
+                        video.insert(i, np.zeros(n_frame_lm))
+                else:
+                    # insert at the end and the beginning of the list
+                    for i in range(0, diff/2):
+                        video.append(np.zeros(n_frame_lm))
+                        video.insert(i, np.zeros(n_frame_lm))
+
+    # Now that the # of frames between videos are matched, we cast them into tensors
+    for sp in SPLITS:
+        X[sp] = torch.tesor(X[sp])
+
+    return X
+
+def encode_labels(labels):
+    pass 
+
 def load_transform_save_dataset(indexfile='data/WLASL_v0.3.json', vid_directory='data/videos', top_k=200, save=False):
 
     # TODO: error handling in case the user specifies more top_k than glosses available 
@@ -156,7 +200,10 @@ def load_transform_save_dataset(indexfile='data/WLASL_v0.3.json', vid_directory=
         shutil.rmtree(os.path.join(config.VIDEOS_PATH, sp), onerror=rm_error_info)
         print(os.path.join(config.VIDEOS_PATH, sp), "removed.")
 
-    return X, Y
+    X_tens = from_dict_to_tensor(X)
+    Y_enc = encode_labels(Y)
+
+    return X_tens, Y_enc
 
 
 if __name__ == '__main__':
