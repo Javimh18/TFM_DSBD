@@ -65,7 +65,7 @@ def test_mediapipe_live():
         cv2.destroyAllWindows()
 
 def test_mediapipe_video():
-    video_path = '../data/videos/00335.mp4'
+    video_path = 'data/videos/00335.mp4'
     cap = cv2.VideoCapture(video_path)
     fps = cap.get(cv2.CAP_PROP_FPS)
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -80,7 +80,7 @@ def test_mediapipe_video():
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         # Loop until the end of the video
         while (cap.isOpened()):
-            
+            print(f"processing frame {counter+1}")
             # Capture frame by frame
             ret, frame = cap.read()
 

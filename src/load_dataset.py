@@ -12,11 +12,13 @@ import torch
 from mp_funs import extract_landmarks_to_np, FACEMESH_LANDMARKS, POSE_LANDMARKS, HAND_LANDMARKS
 from utils import save_dict, load_dict
 from math import floor
+from sklearn import preprocessing
 
 EXTENSION = '.mp4'
 SPLITS = ['train', 'val', 'test']
 X_PICK_FILE_PATH = 'data/npy_videos/npy_db_x.pkl'
 Y_PICK_FILE_PATH = 'data/npy_videos/npy_db_y.pkl'
+LABELS_MAP_PICK_FILE_PATH = 'data/npy_videos/labels_map.pkl'
 
 mp_holistic = mp.solutions.holistic # Holistic model
 mp_drawing = mp.solutions.drawing_utils # Drawing utilities that will be useful for action representation
@@ -98,7 +100,6 @@ def organize(indexfile='data/WLASL_v0.3.json', vid_directory='data/videos', top_
 
 
 def from_dict_to_tensor(X):
-
     max_len = -10e8
     n_frame_lm = FACEMESH_LANDMARKS + POSE_LANDMARKS + 2*HAND_LANDMARKS
 
@@ -110,10 +111,11 @@ def from_dict_to_tensor(X):
                 max_len = cur_len
 
     # once we got the max_len, we expland the videos to match the frames
+    dims = {}
     for sp in SPLITS:
         split = X[sp]
         for video in split:
-            diff = len(video) - max_len
+            diff = max_len - len(video)
             if diff != 0:
                 if diff % 2 != 0:
                     # insert at the end of the list
@@ -125,18 +127,48 @@ def from_dict_to_tensor(X):
                         video.insert(i, np.zeros(n_frame_lm))
                 else:
                     # insert at the end and the beginning of the list
-                    for i in range(0, diff/2):
+                    for i in range(0, int(diff/2)):
                         video.append(np.zeros(n_frame_lm))
                         video.insert(i, np.zeros(n_frame_lm))
-
-    # Now that the # of frames between videos are matched, we cast them into tensors
+        
     for sp in SPLITS:
-        X[sp] = torch.tesor(X[sp])
+        # Retrieve the dimensions from the tensors
+        dims[sp] = (len(X[sp]), max_len, n_frame_lm)
+        # flatten the nested list of np.arrays 
+        X[sp] = np.concatenate(X[sp]).ravel()
+        
+    # Now that the number of frames between videos are matched, we cast them into tensors
+    for sp in SPLITS:
+        X[sp] = torch.tensor(X[sp]).reshape(dims[sp])
 
     return X
 
+
 def encode_labels(labels):
-    pass 
+    new_labels = {}
+    le = preprocessing.LabelEncoder()
+    le.fit(labels['train'])
+
+    for sp in SPLITS:
+        new_labels[sp] = torch.tensor(le.transform(labels[sp]))
+
+    le_mapping = dict(zip(le.classes_, le.transform(le.classes_)))
+
+    return new_labels, le_mapping 
+
+
+def save_dataset(X_tens, Y_enc, le_mapping):
+    save_dict(X_tens, X_PICK_FILE_PATH)
+    save_dict(Y_enc, Y_PICK_FILE_PATH)
+    save_dict(le_mapping, LABELS_MAP_PICK_FILE_PATH)
+
+
+def load_dataset():
+    X_tens = load_dict(X_PICK_FILE_PATH)
+    Y_enc = load_dict(Y_PICK_FILE_PATH)
+    le_mapping = load_dict(LABELS_MAP_PICK_FILE_PATH)
+    return X_tens, Y_enc, le_mapping
+
 
 def load_transform_save_dataset(indexfile='data/WLASL_v0.3.json', vid_directory='data/videos', top_k=200, save=False):
 
@@ -189,31 +221,28 @@ def load_transform_save_dataset(indexfile='data/WLASL_v0.3.json', vid_directory=
             Y[sp] = video_labels
             print("INFO: ", sp, "split processed.")
     
-    if save:
-        # with all correctly stored, we save the file in a pickl file.
-        print("Data stored in dictionary, saving in pickel file under data/npy_videos folder...")
-        save_dict(X, X_PICK_FILE_PATH)
-        save_dict(Y, Y_PICK_FILE_PATH)
+    print("Transforming the data to Pytorch Tensors...")
+    X_tens = from_dict_to_tensor(X)
+    Y_enc, le_mapping = encode_labels(Y)
 
     print("Removing the auxiliar folders...")
     for sp in SPLITS:
         shutil.rmtree(os.path.join(config.VIDEOS_PATH, sp), onerror=rm_error_info)
         print(os.path.join(config.VIDEOS_PATH, sp), "removed.")
 
-    X_tens = from_dict_to_tensor(X)
-    Y_enc = encode_labels(Y)
-
-    return X_tens, Y_enc
+    if save:
+        # with all correctly stored, we save the file in a pickl file.
+        print("Data stored in dictionary, saving in pickel file under data/npy_videos folder...")
+        save_dataset(X_tens, Y_enc, le_mapping)
+    else:
+        return X_tens, Y_enc, le_mapping
 
 
 if __name__ == '__main__':
     
-    load = False
-    if load:
-        X, Y = load_transform_save_dataset(top_k=20, save=True)
-    else:
-        X = load_dict(X_PICK_FILE_PATH)
-        Y = load_dict(Y_PICK_FILE_PATH)
+    
+    #load_transform_save_dataset(top_k=20, save=True)
+    X, Y, le_mapping = load_dataset()
     
     X_train = X['train']
     X_test = X['test']
@@ -223,5 +252,6 @@ if __name__ == '__main__':
     Y_test = Y['test']
     Y_val = Y['val']
 
-    print("X_train: ", X_train[0])
-    print("Y_train: ", Y_train[0])
+    print("X_train: ", X_train[0][89])
+    print("Y_train: ", Y_train)
+    print("Labels mapping: ", le_mapping)
