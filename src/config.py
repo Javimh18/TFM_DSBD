@@ -18,3 +18,9 @@ MODEL_PATH = os.path.join(BASE_OUTPUT, "sign_detector.h5")
 INIT_LR = 1e-4
 NUM_EPOCHS = 30
 BATCH_SIZE = 32
+
+EXTENSION = '.mp4'
+SPLITS = ['train', 'val', 'test']
+X_PICK_FILE_PATH = 'data/npy_videos/npy_db_x.pkl'
+Y_PICK_FILE_PATH = 'data/npy_videos/npy_db_y.pkl'
+LABELS_MAP_PICK_FILE_PATH = 'data/npy_videos/labels_map.pkl'
