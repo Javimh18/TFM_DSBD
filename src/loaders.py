@@ -7,7 +7,7 @@ import cv2
 from mp_funs import extract_landmarks_to_np, FACEMESH_LANDMARKS, POSE_LANDMARKS, HAND_LANDMARKS
 from utils import save_dict, load_dict
 from math import floor
-from config import SPLITS, EXTENSION, X_PICK_FILE_PATH, Y_PICK_FILE_PATH, LABELS_MAP_PICK_FILE_PATH, VIDEOS_PATH
+from config import SPLITS, EXTENSION, X_PICK_FILE_PATH, Y_PICK_FILE_PATH, LABELS_MAP_PICK_FILE_PATH, BASE_PATH
 
 mp_holistic = mp.solutions.holistic # Holistic model
 mp_drawing = mp.solutions.drawing_utils # Drawing utilities that will be useful for action representation
@@ -25,6 +25,7 @@ def encode_labels(labels):
 
     return new_labels, le_mapping 
 
+
 def save_dataset(X_tens, Y_enc, le_mapping):
     save_dict(X_tens, X_PICK_FILE_PATH)
     save_dict(Y_enc, Y_PICK_FILE_PATH)
@@ -36,6 +37,7 @@ def load_dataset():
     Y_enc = load_dict(Y_PICK_FILE_PATH)
     le_mapping = load_dict(LABELS_MAP_PICK_FILE_PATH)
     return X_tens, Y_enc, le_mapping
+
 
 def from_dict_to_tensor(X):
     max_len = -10e8
@@ -98,11 +100,11 @@ def transform_to_mediapipe_tensors_dataset(indexfile='data/WLASL_v0.3.json',
         for sp in SPLITS:
             video_labels = []
             landmarks_from_videos = []
-            for gloss in os.listdir(os.path.join(VIDEOS_PATH, dataset, sp)):
+            for gloss in os.listdir(os.path.join(BASE_PATH, dataset, sp)):
                 # Iteration over each video
-                for video_path in os.listdir(os.path.join(VIDEOS_PATH, dataset, sp, gloss)):
+                for video_path in os.listdir(os.path.join(BASE_PATH, dataset, sp, gloss)):
                     video_landmarks = []
-                    cap = cv2.VideoCapture(os.path.join(VIDEOS_PATH, dataset, sp, gloss, video_path))
+                    cap = cv2.VideoCapture(os.path.join(BASE_PATH, dataset, sp, gloss, video_path))
                     # Loop until the end of the video
                     counter = 0
                     ret = True

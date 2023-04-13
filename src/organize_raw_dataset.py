@@ -10,12 +10,24 @@ from config import SPLITS, EXTENSION
 def rm_error_info(func, path, _):
     print("INFO: The path", path, "does not exist. Skipping...")
 
+
 def get_n_gloss(indexfile='data/WLASL_v0.3.json'):
     content = json.load(open(indexfile))
     return len([items for items in content])
 
+
 def remove_original_videos():
     shutil.rmtree(os.path.join(config.VIDEOS_PATH, "*.mp4"), onerror=rm_error_info)
+
+
+def remove_empty_folders(root):
+    folders = list(os.walk(root))[1:]
+
+    for folder in folders:
+        # folder example: ('FOLDER/3', [], ['file'])
+        if not folder[2]:
+            shutil.rmtree(folder[0])
+
 
 def gloss_ranking(content, vid_directory, top_k):
     ranking = {}
@@ -66,7 +78,7 @@ def organize(indexfile='data/WLASL_v0.3.json', vid_directory='data/videos', top_
                 split = inst['split']
 
                 source = os.path.join(vid_directory, vid_id+EXTENSION)
-                destination = os.path.join(vid_directory, f"top_{top_k}", split, gloss)
+                destination = os.path.join("./data", f"top_{top_k}", split, gloss)
 
                 # create the dataset structure /data/videos/top_k/<train|test|val>/gloss
                 if not os.path.exists(destination): 
@@ -76,6 +88,7 @@ def organize(indexfile='data/WLASL_v0.3.json', vid_directory='data/videos', top_
                 if os.path.exists(source):
                     shutil.copy(source, destination)
     
+
 def create_datasets(indexfile='data/WLASL_v0.3.json', 
                       vid_directory='data/videos', 
                       keep_original=True):
@@ -89,12 +102,20 @@ def create_datasets(indexfile='data/WLASL_v0.3.json',
     * top_1000: dataset with the top 1000 datasets
     * top_2000: dataset with the top 2000 datasets
     '''
-    sizes = [10, 100, 200, 500, 1000, 2000]
+    # sizes = [10, 100, 200, 500, 1000, 2000]
+    sizes = [10, 100, 200]
     for K in sizes:
         organize(indexfile, vid_directory, top_k=K)
 
     if keep_original == False:
         remove_original_videos()
+
+    # There might be some glosses where there are no videos. We will erase them to have some consistency.
+    # in our dataset.
+    for K in sizes:
+        for sp in SPLITS:
+            root = f'./data/top_{K}/{sp}/'
+            remove_empty_folders(root)
 
     return
 

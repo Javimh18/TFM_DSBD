@@ -7,6 +7,7 @@
 *.PNG
 *.csv
 *.pyc
+.DS_Store
 WLASL_tools
 data
 __pycache__
