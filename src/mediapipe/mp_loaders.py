@@ -7,7 +7,7 @@ import cv2
 from mp_funs import extract_landmarks_to_np, FACEMESH_LANDMARKS, POSE_LANDMARKS, HAND_LANDMARKS
 from utils import save_dict, load_dict
 from math import floor
-from mediapipe.config import SPLITS, X_PICK_FILE_NAME, Y_PICK_FILE_NAME, LABELS_MAP_PICK_FILE_NAME, DATA_PATH, PCKL_PATH
+from config import SPLITS, X_PICK_FILE_NAME, Y_PICK_FILE_NAME, LABELS_MAP_PICK_FILE_NAME, DATA_PATH, PCKL_PATH
 
 mp_holistic = mp.solutions.holistic # Holistic model
 mp_drawing = mp.solutions.drawing_utils # Drawing utilities that will be useful for action representation
@@ -26,7 +26,7 @@ def encode_labels(labels):
     return new_labels, le_mapping 
 
 
-def save_dataset(X_tens, Y_enc, le_mapping, dataset):
+def save_dataset(X_tens, Y_enc, le_mapping, dataset:str):
 
     if not os.path.exists(os.path.join(PCKL_PATH, dataset)):
         os.makedirs(os.path.join(PCKL_PATH, dataset), exist_ok=True)
@@ -36,7 +36,7 @@ def save_dataset(X_tens, Y_enc, le_mapping, dataset):
     save_dict(le_mapping, os.path.join(PCKL_PATH, dataset, LABELS_MAP_PICK_FILE_NAME))
 
 
-def load_dataset_from_pickle(dataset):
+def load_dataset_from_pickle(dataset:str):
     X_tens = load_dict(os.path.join(PCKL_PATH, dataset, X_PICK_FILE_NAME))
     Y_enc = load_dict(os.path.join(PCKL_PATH, dataset, Y_PICK_FILE_NAME))
     le_mapping = load_dict(os.path.join(PCKL_PATH, dataset, LABELS_MAP_PICK_FILE_NAME))
