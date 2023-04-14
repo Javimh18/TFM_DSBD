@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from math import floor
-import torch.nn.functional as F
+from config import BATCH_SIZE
 
 class MediaPipeLSTM(nn.Module):
     def __init__(self, n_frames, n_landmarks, n_classes, hidden_dim):
@@ -15,7 +15,7 @@ class MediaPipeLSTM(nn.Module):
         # Hidden dim of the STM channel
         self.hidden_dim = hidden_dim
         # Initialize hidden state
-        self.hidden_st = (torch.randn(1, hidden_dim), torch.randn(1, hidden_dim))
+        self.hidden_st = (torch.randn(1, BATCH_SIZE, hidden_dim), torch.randn(1, BATCH_SIZE, hidden_dim))
 
         # define the LSTM, which takes all the landmarks, from each frame of the video
         self.lstm = nn.LSTM(input_size = n_landmarks, hidden_size = hidden_dim, 
@@ -36,9 +36,9 @@ class MediaPipeLSTM(nn.Module):
         relu2 = self.fc_to_relu(dense)
         fc = self.dense_to_fc(relu2)
         logits = self.fc_to_relu(fc)
-        pred_prob = F.log_softmax(logits, dim=1)
 
-        return pred_prob
+        #since our observation has several sequences, we only want the output after the last sequence of the observation'''   
+        return logits[:, -1, :]
 
 
     
