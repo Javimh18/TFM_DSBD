@@ -7,7 +7,7 @@ import cv2
 from mp_funs import extract_landmarks_to_np, FACEMESH_LANDMARKS, POSE_LANDMARKS, HAND_LANDMARKS
 from utils import save_dict, load_dict
 from math import floor
-from config import SPLITS, EXTENSION, X_PICK_FILE_PATH, Y_PICK_FILE_PATH, LABELS_MAP_PICK_FILE_PATH, BASE_PATH
+from mediapipe.config import SPLITS, X_PICK_FILE_NAME, Y_PICK_FILE_NAME, LABELS_MAP_PICK_FILE_NAME, DATA_PATH, PCKL_PATH
 
 mp_holistic = mp.solutions.holistic # Holistic model
 mp_drawing = mp.solutions.drawing_utils # Drawing utilities that will be useful for action representation
@@ -26,16 +26,20 @@ def encode_labels(labels):
     return new_labels, le_mapping 
 
 
-def save_dataset(X_tens, Y_enc, le_mapping):
-    save_dict(X_tens, X_PICK_FILE_PATH)
-    save_dict(Y_enc, Y_PICK_FILE_PATH)
-    save_dict(le_mapping, LABELS_MAP_PICK_FILE_PATH)
+def save_dataset(X_tens, Y_enc, le_mapping, dataset):
+
+    if not os.path.exists(os.path.join(PCKL_PATH, dataset)):
+        os.makedirs(os.path.join(PCKL_PATH, dataset), exist_ok=True)
+
+    save_dict(X_tens, os.path.join(PCKL_PATH, dataset, X_PICK_FILE_NAME))
+    save_dict(Y_enc, os.path.join(PCKL_PATH, dataset, Y_PICK_FILE_NAME))
+    save_dict(le_mapping, os.path.join(PCKL_PATH, dataset, LABELS_MAP_PICK_FILE_NAME))
 
 
-def load_dataset():
-    X_tens = load_dict(X_PICK_FILE_PATH)
-    Y_enc = load_dict(Y_PICK_FILE_PATH)
-    le_mapping = load_dict(LABELS_MAP_PICK_FILE_PATH)
+def load_dataset_from_pickle(dataset):
+    X_tens = load_dict(os.path.join(PCKL_PATH, dataset, X_PICK_FILE_NAME))
+    Y_enc = load_dict(os.path.join(PCKL_PATH, dataset, Y_PICK_FILE_NAME))
+    le_mapping = load_dict(os.path.join(PCKL_PATH, dataset, LABELS_MAP_PICK_FILE_NAME))
     return X_tens, Y_enc, le_mapping
 
 
@@ -84,11 +88,8 @@ def from_dict_to_tensor(X):
     return X
 
 
-def transform_to_mediapipe_tensors_dataset(indexfile='data/WLASL_v0.3.json', 
-                                vid_directory='data/videos', 
-                                top_k=200, 
-                                save=False,
-                                keep_original=False):
+def transform_to_mediapipe_tensors_dataset(top_k=200, 
+                                           save=False):
 
     print(f"Applying mediapipe transformations to the top_{top_k} dataset...")
     dataset = f"top_{top_k}"
@@ -100,11 +101,11 @@ def transform_to_mediapipe_tensors_dataset(indexfile='data/WLASL_v0.3.json',
         for sp in SPLITS:
             video_labels = []
             landmarks_from_videos = []
-            for gloss in os.listdir(os.path.join(BASE_PATH, dataset, sp)):
+            for gloss in os.listdir(os.path.join(DATA_PATH, dataset, sp)):
                 # Iteration over each video
-                for video_path in os.listdir(os.path.join(BASE_PATH, dataset, sp, gloss)):
+                for video_name in os.listdir(os.path.join(DATA_PATH, dataset, sp, gloss)):
                     video_landmarks = []
-                    cap = cv2.VideoCapture(os.path.join(BASE_PATH, dataset, sp, gloss, video_path))
+                    cap = cv2.VideoCapture(os.path.join(DATA_PATH, dataset, sp, gloss, video_name))
                     # Loop until the end of the video
                     counter = 0
                     ret = True
@@ -140,7 +141,10 @@ def transform_to_mediapipe_tensors_dataset(indexfile='data/WLASL_v0.3.json',
 
     if save:
         # with all correctly stored, we save the file in a pickl file.
-        print("Data stored in dictionary, saving in pickel file under data/npy_videos folder...")
-        save_dataset(X_tens, Y_enc, le_mapping)
+        print("Data stored in dictionary, saving in pickel file under data/pckl_files folder...")
+        save_dataset(X_tens, Y_enc, le_mapping, dataset)
     else:
         return X_tens, Y_enc, le_mapping
+    
+if __name__ == '__main__':
+    transform_to_mediapipe_tensors_dataset(top_k=10, save=True)

@@ -2,7 +2,7 @@ import json
 
 import numpy as np
 import cv2
-import config
+import mediapipe.config as config
 import os
 import mediapipe as mp
 import pandas as pd

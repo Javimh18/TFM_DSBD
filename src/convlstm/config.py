@@ -2,9 +2,9 @@ import os
 
 # Define de inputs of the data and the metadata. In this case, the metadata is 
 # represented via JSON file in the data directory
-BASE_PATH = './data'
-VIDEOS_PATH = os.path.join(BASE_PATH, 'videos')
-METADATA_PATH = os.path.join(BASE_PATH, 'WLASL_v0.3.json')
+DATA_PATH = './data'
+VIDEOS_PATH = os.path.join(DATA_PATH, 'videos')
+METADATA_PATH = os.path.join(DATA_PATH, 'WLASL_v0.3.json')
 
 # define the path to the base output directory
 BASE_OUTPUT = "output"
@@ -20,6 +20,7 @@ BATCH_SIZE = 32
 
 EXTENSION = '.mp4'
 SPLITS = ['train', 'val', 'test']
-X_PICK_FILE_PATH = 'data/npy_videos/npy_db_x.pkl'
-Y_PICK_FILE_PATH = 'data/npy_videos/npy_db_y.pkl'
-LABELS_MAP_PICK_FILE_PATH = 'data/npy_videos/labels_map.pkl'
+PCKL_PATH = os.path.join(DATA_PATH, "pckl_files")
+X_PICK_FILE_NAME = 'npy_db_x.pkl'
+Y_PICK_FILE_NAME = 'npy_db_y.pkl'
+LABELS_MAP_PICK_FILE_NAME = 'labels_map.pkl'

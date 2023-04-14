@@ -2,10 +2,10 @@ import json
 import os
 import shutil
 import itertools
-import config
+import mediapipe.config as config
 import os
 
-from config import SPLITS, EXTENSION
+from mediapipe.config import SPLITS, EXTENSION
 
 def rm_error_info(func, path, _):
     print("INFO: The path", path, "does not exist. Skipping...")

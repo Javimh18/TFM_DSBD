@@ -3,7 +3,6 @@ channels:
   - defaults
   - conda-forge
 dependencies:
-  - keras=2.9.0
   - jupyter=1.0.0
   - nb_conda=2.2.1
   - matplotlib=3.5.2
@@ -17,10 +16,9 @@ dependencies:
   - scikit-image=0.19.2
   - wordcloud=1.8.2.2
   - jedi=0.18.1
-  - tensorflow=2.9.1
   - pip:
     - eli5==0.13.0
     - scikit-optimize==0.9.0
     - mediapipe
     - opencv-python==4.7.0.72
-    - six
+    - six*
