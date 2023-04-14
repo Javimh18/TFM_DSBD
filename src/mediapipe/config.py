@@ -13,9 +13,10 @@ MODEL_PATH = os.path.join(BASE_OUTPUT, "sign_detector.h5")
 
 # Initialization parameters such as initial learning rate, number of epochs to train 
 # or the initial batch size
-INIT_LR = 1e-4
-NUM_EPOCHS = 30
-BATCH_SIZE = 32
+INIT_LR = 1e-2
+NUM_EPOCHS = 5
+BATCH_SIZE = 8
+NUM_WORKERS = os.cpu_count()
 
 EXTENSION = '.mp4'
 SPLITS = ['train', 'val', 'test']
