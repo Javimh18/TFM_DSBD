@@ -1,6 +1,7 @@
 import torch
 from tqdm.auto import tqdm
 import torch.nn.functional as F
+from config import BATCH_SIZE
 
 
 # Calculate accuracy - TP/(TP + TN) - out of a 100 example, what percentage does our model get right
@@ -20,17 +21,20 @@ def train_step(model: torch.nn.Module,
     # set the model to train mode
     model.train()
     for batch, (X, y) in enumerate(data_loader):
+        
+        # we flatten each video into an array of landmarks
+        X = torch.flatten(X, start_dim=1).unsqueeze(1)
 
         # send the data to the device
         X, y = X.to(device), y.to(device)
 
         # get predictions
         pred_logits = model(X)
-        y_pred = torch.argmax(F.softmax(pred_logits, dim=1), dim=1)
+        y_pred = torch.argmax(F.log_softmax(pred_logits, dim=1), dim=1)
 
         # compute the loss
         loss = loss_fn(pred_logits, y)
-        train_loss += loss
+        train_loss += loss.item()
 
         # compute the accuracy
         train_acc += accuracy_fn(y_true=y,
@@ -45,14 +49,11 @@ def train_step(model: torch.nn.Module,
         # Updating the parameters
         optimizer.step()
 
-        if batch % 10 == 0:
-            print(f"Looked at {batch * len(X)} / {len(data_loader)} samples.")
-
         # Divide total train loss by length of train dataloader
         train_loss /= len(data_loader)
         train_acc /= len(data_loader)
 
-        print(f"Train Loss: {train_loss:.5f} | Train acc {train_acc:.2f} %")
+    print(f"Train Loss: {train_loss:.5f} | Train acc {train_acc:.2f} %")
 
     return
 
