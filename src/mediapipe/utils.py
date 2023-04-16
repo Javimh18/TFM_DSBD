@@ -1,5 +1,4 @@
 from six.moves import cPickle as pickle # for performance
-import os
 
 def save_dict(di_, filename_):
     with open(filename_, 'wb') as f:

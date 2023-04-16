@@ -5,20 +5,24 @@ from config import BATCH_SIZE
 
 # Idea taken from: https://towardsdatascience.com/from-a-lstm-cell-to-a-multilayer-lstm-network-with-pytorch-2899eb5696f3
 class MediaPipeLSTM(nn.Module):
-    def __init__(self, input_dim, output_dim, hidden_dim):
+    def __init__(self, input_dim, output_dim, hidden_dim, seq_len = 10):
         super(MediaPipeLSTM, self).__init__()
 
         self.in_dim = input_dim
         self.out_dim = output_dim
         self.hidden_dim = hidden_dim
-        self.seq_len = 155
+        self.seq_len = seq_len
 
         self.lstmcell_1 = nn.LSTMCell(input_dim, hidden_dim)
         self.lstmcell_2 = nn.LSTMCell(hidden_dim, hidden_dim)
         self.stack_fc_nn = nn.Sequential(
-            nn.Linear(in_features=hidden_dim, out_features=output_dim+30),
+            nn.Linear(in_features=hidden_dim, out_features=400),
             nn.ReLU(),
-            nn.Linear(in_features=output_dim+30, out_features=output_dim),
+            nn.Linear(in_features=400, out_features=200),
+            nn.ReLU(),
+            nn.Linear(in_features=200, out_features=50),
+            nn.ReLU(),
+            nn.Linear(in_features=50, out_features=output_dim),
             nn.ReLU()
         )
 
@@ -48,7 +52,7 @@ class MediaPipeLSTM(nn.Module):
         for i in range(self.seq_len):
             hidden_state, cell_state = self.lstmcell_1(x[i], (hidden_state, cell_state))
             hidden_state_2, cell_state_2 = self.lstmcell_2(hidden_state, (hidden_state_2, cell_state_2))
-            hidden_state_3, cell_state_3 = self.lstmcell_2(hidden_state, (hidden_state_3, cell_state_3))
+            hidden_state_3, cell_state_3 = self.lstmcell_2(hidden_state_2, (hidden_state_3, cell_state_3))
 
         out = self.stack_fc_nn(hidden_state_3)
 
