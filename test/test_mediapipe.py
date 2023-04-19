@@ -65,15 +65,15 @@ def test_mediapipe_live():
         cv2.destroyAllWindows()
 
 def test_mediapipe_video():
-    video_path = 'data/videos/00335.mp4'
+    video_path = 'data/videos/train/Enemy/010_004_005.mp4'
     cap = cv2.VideoCapture(video_path)
     fps = cap.get(cv2.CAP_PROP_FPS)
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     # total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-    fourCC = cv2.VideoWriter_fourcc('M','J','P','G')
-    out = cv2.VideoWriter('mp_test.mp4', fourCC, fps, (frame_width,frame_height))
+    fourCC = cv2.VideoWriter_fourcc("m", "p", "4", "v")
+    out = cv2.VideoWriter('./test/mp_test.mp4', fourCC, fps, (frame_width,frame_height))
 
     counter = 0
     # declaration of the holistic model in media pipe
