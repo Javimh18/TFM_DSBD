@@ -10,4 +10,5 @@
 .DS_Store
 WLASL_tools
 data
+data_full
 __pycache__
