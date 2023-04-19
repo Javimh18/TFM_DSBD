@@ -21,7 +21,7 @@ LM_PER_VIDEO = 20
 
 EXTENSION = '.mp4'
 SPLITS = ['train', 'val', 'test']
-PCKL_PATH = os.path.join(DATA_PATH, "pckl_files")
+PCKL_PATH = os.path.join("pckl_files")
 X_PICK_FILE_NAME = 'npy_db_x.pkl'
 Y_PICK_FILE_NAME = 'npy_db_y.pkl'
 LABELS_MAP_PICK_FILE_NAME = 'labels_map.pkl'

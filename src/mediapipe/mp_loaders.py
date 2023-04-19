@@ -74,7 +74,13 @@ def from_dict_to_pytorch_tensor(X, labels):
 
 
 def transform_to_mediapipe_tensors_dataset(save=False,
-                                           framework="tf"):
+                                           framework="tf",
+                                           path_to_subset=None):
+    
+    if path_to_subset is None:
+        path = VIDEOS_PATH
+    else:
+        path = path_to_subset
     
     X = {}
     Y = {}
@@ -86,11 +92,11 @@ def transform_to_mediapipe_tensors_dataset(save=False,
             video_labels = []
             landmarks_from_videos = []
             extracted_frames_from_videos = []
-            for gloss in tqdm(os.listdir(os.path.join(VIDEOS_PATH, sp))):
+            for gloss in tqdm(os.listdir(os.path.join(path, sp))):
                 # Iteration over each video
-                for video_name in os.listdir(os.path.join(VIDEOS_PATH, sp, gloss)):
+                for video_name in os.listdir(os.path.join(path, sp, gloss)):
                     video_landmarks = []
-                    cap = cv2.VideoCapture(os.path.join(VIDEOS_PATH, sp, gloss, video_name))
+                    cap = cv2.VideoCapture(os.path.join(path, sp, gloss, video_name))
                     # Loop until the end of the video
                     counter = 0
                     ret = True
@@ -148,4 +154,4 @@ def transform_to_mediapipe_tensors_dataset(save=False,
         return X_tens, Y_enc, le_mapping, extracted_frames, 
     
 if __name__ == '__main__':
-    transform_to_mediapipe_tensors_dataset(save=True, framework="tf")
+    transform_to_mediapipe_tensors_dataset(save=True, framework="tf", path_to_subset='data/subset_10_lsa_64')

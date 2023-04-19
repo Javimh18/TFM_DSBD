@@ -25,12 +25,12 @@ def mediapipe_detection(image, model):
 def draw_styled_landmarks(image, results):
 
     # Draw face-mesh connections
-    """
+    
     mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACEMESH_TESSELATION,
                               mp_drawing.DrawingSpec(color=(136, 198, 255), thickness=.25, circle_radius=1), 
                               mp_drawing.DrawingSpec(color=(44, 200, 68), thickness=.25, circle_radius=.5)
                              ) 
-    """
+    
     # Draw pose connections
     mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS,
                               mp_drawing.DrawingSpec(color=(80,22,10), thickness=2, circle_radius=1), 
@@ -72,8 +72,7 @@ def extract_landmarks_to_np(results):
     right_hand_landmarks = extract_right_hand_landmarks(results)
     left_hand_landmarks = extract_left_hand_landmarks(results)
     pose_landmarks = extract_pose_landmarks(results)
+    facemesh_landmarks = extract_facemesh_landmarks(results)
+    
+    return np.concatenate([right_hand_landmarks, left_hand_landmarks, pose_landmarks, facemesh_landmarks])
 
-    # facemesh_landmarks = extract_facemesh_landmarks(results)
-    # return np.concatenate([right_hand_landmarks, left_hand_landmarks, pose_landmarks, facemesh_landmarks])
-
-    return np.concatenate([right_hand_landmarks, left_hand_landmarks, pose_landmarks])
