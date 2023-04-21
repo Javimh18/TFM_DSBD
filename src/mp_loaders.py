@@ -1,12 +1,11 @@
 import mediapipe as mp
 from sklearn import preprocessing
-import torch
 import numpy as np
 from numpy.random import default_rng
 import os
 import cv2
 from tqdm import tqdm 
-from mp_funs import extract_landmarks_to_np, FACEMESH_LANDMARKS, POSE_LANDMARKS, HAND_LANDMARKS
+from mp_funs import extract_landmarks_to_np
 from utils import save_dict, load_dict
 from config import SPLITS, X_PICK_FILE_NAME, Y_PICK_FILE_NAME, LABELS_MAP_PICK_FILE_NAME, VIDEOS_PATH, PCKL_PATH, LM_PER_VIDEO, EXTRACTED_FRAMES_PICK_FILENAME
 
@@ -15,23 +14,19 @@ mp_drawing = mp.solutions.drawing_utils # Drawing utilities that will be useful 
 
 rng = default_rng()
 
-def save_dataset(X_tens, Y_enc, le_mapping, extracted_frames, framework: str):
+def save_dataset(X_tens: dict, Y_enc: dict, le_mapping: dict, path_to_save:str = None):
 
-    if not os.path.exists(os.path.join(PCKL_PATH, framework)):
-        os.makedirs(os.path.join(PCKL_PATH, framework), exist_ok=True)
+    if path_to_save is None:
+        print("Path to save empty. Please specify a path to where save the landmarks.")
+        return
 
-    save_dict(X_tens, os.path.join(PCKL_PATH, framework, X_PICK_FILE_NAME))
-    save_dict(Y_enc, os.path.join(PCKL_PATH, framework, Y_PICK_FILE_NAME))
-    save_dict(le_mapping, os.path.join(PCKL_PATH, framework, LABELS_MAP_PICK_FILE_NAME))
-    save_dict(le_mapping, os.path.join(PCKL_PATH, extracted_frames, EXTRACTED_FRAMES_PICK_FILENAME))
+    if not os.path.exists(os.path.join(path_to_save)):
+        os.makedirs(os.path.join(path_to_save), exist_ok=True)
 
+    save_dict(X_tens, os.path.join(path_to_save, X_PICK_FILE_NAME))
+    save_dict(Y_enc, os.path.join(path_to_save, Y_PICK_FILE_NAME))
+    save_dict(le_mapping, os.path.join(path_to_save, LABELS_MAP_PICK_FILE_NAME))
 
-def load_dataset_from_pickle(framework: str):
-    X_tens = load_dict(os.path.join(PCKL_PATH, framework, X_PICK_FILE_NAME))
-    Y_enc = load_dict(os.path.join(PCKL_PATH, framework, Y_PICK_FILE_NAME))
-    le_mapping = load_dict(os.path.join(PCKL_PATH, framework, LABELS_MAP_PICK_FILE_NAME))
-    extracted_frames = load_dict(os.path.join(PCKL_PATH, framework, EXTRACTED_FRAMES_PICK_FILENAME))
-    return X_tens, Y_enc, le_mapping, extracted_frames
 
 def label_dict(labels):
     new_labels = {}
@@ -46,36 +41,9 @@ def label_dict(labels):
     return new_labels, le_mapping
 
 
-def from_dict_to_pytorch_tensor(X, labels):
-    max_len = LM_PER_VIDEO
-    n_frame_lm = FACEMESH_LANDMARKS + POSE_LANDMARKS + 2*HAND_LANDMARKS
-
-    new_labels = {}
-    le = preprocessing.LabelEncoder()
-    le.fit(labels['train'])
-
-    le_mapping = dict(zip(le.classes_, le.transform(le.classes_)))
-
-    for sp in SPLITS:
-        new_labels[sp] = torch.tensor(le.transform(labels[sp]))
-
-    dims = {}     
-    for sp in SPLITS:
-        # Retrieve the dimensions from the tensors
-        dims[sp] = (len(X[sp]), max_len, n_frame_lm)
-        # flatten the nested list of np.arrays 
-        X[sp] = np.concatenate(X[sp]).ravel()
-        
-    # Now that the number of frames between videos are matched, we cast them into tensors
-    for sp in SPLITS:
-        X[sp] = torch.tensor(X[sp]).reshape(dims[sp])
-
-    return X, new_labels, le_mapping
-
-
-def transform_to_mediapipe_tensors_dataset(save=False,
-                                           framework="tf",
-                                           path_to_subset=None):
+def transform_to_mediapipe_tensors_dataset(save = False,
+                                           path_to_save = None,
+                                           path_to_subset = None):
     
     if path_to_subset is None:
         path = VIDEOS_PATH
@@ -84,7 +52,6 @@ def transform_to_mediapipe_tensors_dataset(save=False,
     
     X = {}
     Y = {}
-    extracted_frames = {}
     # declaration of the holistic model in media pipe
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         # we iterate through the folders
@@ -128,30 +95,21 @@ def transform_to_mediapipe_tensors_dataset(save=False,
                     landmarks_from_videos.append(extracted_n_lm)
                     video_labels.append(gloss)
                     extracted_frames_from_videos.append(extracted_n_lm)
-            if framework == 'pytorch':
-                X[sp] = landmarks_from_videos
-                Y[sp] = video_labels
-                extracted_frames[sp] = np.array(extracted_frames_from_videos)
-            elif framework == 'tf':
-                X[sp] = np.array(landmarks_from_videos)
-                Y[sp] = np.array(video_labels)
-                extracted_frames[sp] = np.array(extracted_frames_from_videos)
+            
+            X[sp] = np.array(landmarks_from_videos)
+            Y[sp] = np.array(video_labels)
             print("INFO: ", sp, "split processed.")
     
-    if framework == "pytorch":
-        print("Transforming the data to Pytorch Tensors...")
-        X_tens, Y_enc, le_mapping = from_dict_to_pytorch_tensor(X, Y)
-    elif framework == "tf":
         print("Transforming the data to TF Tensors...")
         X_tens = X
         Y_enc, le_mapping = label_dict(Y)
 
     if save:
         # with all correctly stored, we save the file in a pickl file.
-        print(f"Data stored in dictionary, saving in pickel file under data/pckl_files/{framework} folder...")
-        save_dataset(X_tens, Y_enc, le_mapping, extracted_frames, framework)
+        print(f"Data stored in dictionary, saving in pickel file under {path_to_save} folder...")
+        save_dataset(X_tens, Y_enc, le_mapping, path_to_save)
     else:
-        return X_tens, Y_enc, le_mapping, extracted_frames, 
+        return X_tens, Y_enc, le_mapping
     
 if __name__ == '__main__':
-    transform_to_mediapipe_tensors_dataset(save=True, framework="tf", path_to_subset='data/subset_10_lsa_64')
+    transform_to_mediapipe_tensors_dataset(save=True, path_to_save="./data/subset_10_lsa_64/pickl_files", path_to_subset='data/subset_10_lsa_64')
