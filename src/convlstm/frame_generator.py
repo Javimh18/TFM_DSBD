@@ -1,6 +1,6 @@
 from load_dataset_aux import frames_from_video_file
 import random
-from config import EXTENSION
+from src.config import EXTENSION
 
 class FrameGenerator:
   def __init__(self, path, n_frames, training = False):

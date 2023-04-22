@@ -6,7 +6,7 @@ import numpy as np
 import random
 import imageio
 from tensorflow_docs.vis import embed
-from config import EXTENSION
+from src.config import EXTENSION
 
 def format_frames(frame, output_size):
   """
