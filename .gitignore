@@ -9,6 +9,7 @@
 *.pyc
 .DS_Store
 WLASL_tools
-data
+data/subset*
+data/videos
 data_full
 __pycache__

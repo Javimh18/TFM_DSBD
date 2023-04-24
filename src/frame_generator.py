@@ -1,4 +1,4 @@
-from load_dataset_aux import frames_from_video_file
+from src.load_dataset_aux import frames_from_video_file
 import random
 from src.config import EXTENSION
 
