@@ -1,4 +1,4 @@
-model_type,model_name,train_acc,val_acc,test_acc,train_loss,val_loss,test_loss,epoch,path_to_model
-mediapipe,mp,0.95,0.92,0.93,0.22,0.28,0.28,77,src/mediapipe/best_mp_model.h5
-convlstm,simple,0.96,0.93,0.93,0.15,0.20,0.19,39,src/convlstm/bestmodels/best_simple_39_0.93_model.h5
-convlstm,stateless,0.93,0.95,0.91,0.22,0.19,0.19,22,src/convlstm/bestmodels/best_stateless_22_0.95_model.h5
+model_type,model_name,train_acc,val_acc,test_acc,train_loss,val_loss,test_loss,epoch,path_to_model,subset_size
+mediapipe,mp,0.95,0.92,0.93,0.22,0.28,0.28,77,src/mediapipe/bestmodels/best_mp_77_0.92_model.h5,10
+convlstm,simple,0.96,0.93,0.93,0.15,0.20,0.19,39,src/convlstm/bestmodels/best_simple_39_0.93_model.h5,10
+convlstm,stateless,0.93,0.95,0.91,0.22,0.19,0.19,22,src/convlstm/bestmodels/best_stateless_22_0.95_model.h5,10
