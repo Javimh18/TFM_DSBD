@@ -6,6 +6,8 @@
 *.png
 *.PNG
 *.csv
+!labels.csv
+!leaderboard.csv
 *.pyc
 .DS_Store
 WLASL_tools
