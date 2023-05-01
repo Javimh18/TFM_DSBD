@@ -17,7 +17,7 @@ INIT_LR = 1e-3
 NUM_EPOCHS = 200
 BATCH_SIZE = 48
 NUM_WORKERS = os.cpu_count()
-LM_PER_VIDEO = 20
+LM_PER_VIDEO = 10
 
 EXTENSION = '.mp4'
 SPLITS = ['train', 'val', 'test']
