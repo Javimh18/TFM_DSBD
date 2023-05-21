@@ -14,9 +14,10 @@ class Leaderboard:
         # check if the type of the model exists. In that case update that entry on
         # the leader board. If not, create new entry to the dataframe
         if self.lb['model_type'].eq(model_type).any() and self.lb['model_name'].eq(model_name).any() and self.lb['subset_size'].eq(subset_size).any():
-            row = self.lb.loc[self.lb['model_type'].eq(model_type) & self.lb['model_name'].eq(model_name)]
+            row = self.lb.loc[self.lb['model_type'].eq(model_type) & self.lb['model_name'].eq(model_name) & self.lb['subset_size'].eq(subset_size)]
             val_acc_epoch = np.argmax(history.history['val_accuracy']) 
             val_acc_max = history.history['val_accuracy'][val_acc_epoch]
+            print(row['val_acc'].item())
             if row['val_acc'].item() < val_acc_max:
                 updated_row = {
                     'model_type': model_type,
