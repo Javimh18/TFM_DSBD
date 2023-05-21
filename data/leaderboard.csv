@@ -1,6 +1,8 @@
 model_type,model_name,train_acc,val_acc,test_acc,train_loss,val_loss,test_loss,epoch,path_to_model,subset_size
-mediapipe,mp,0.95,0.92,0.93,0.22,0.28,0.28,77.0,src/mediapipe/bestmodels/best_mp_77_0.92_10_model.h5,10.0
 convlstm,simple,0.96,0.93,0.93,0.15,0.2,0.19,39.0,src/convlstm/bestmodels/best_simple_39_0.93_10_model.h5,10.0
 convlstm,stateless,0.93,0.95,0.91,0.22,0.19,0.19,22.0,src/convlstm/bestmodels/best_stateless_22_0.95_10_model.h5,10.0
 3DCNN,3dcnn,0.92,0.9,0.87,0.35,0.39,0.42,63.0,src/3DCNN/bestmodels/best_3dcnn_63_0.90_10_model.h5,10.0
-convlstm,simple,0.96,0.95,0.91,0.1,0.25,0.26,83.0,src/convlstm/bestmodels/best_simple_83_0.95_20_model.h5,20.0
+mediapipe,mp,0.9,0.9,0.87,0.27,0.35,0.54,178.0,src/mediapipe/bestmodels/best_mp_178_0.90_model.h5,20.0
+mediapipe,mp,0.89,0.85,0.85,0.38,0.62,0.43,159.0,src/mediapipe/bestmodels/best_mp_159_0.85_model.h5,40.0
+mediapipe,mp,0.93,0.86,0.86,0.24,0.63,0.55,167.0,src/mediapipe/bestmodels/best_mp_167_0.86_model.h5,30.0
+mediapipe,mp,0.92,0.86,0.05,0.25,0.5,13.1,194.0,src/mediapipe/bestmodels/best_mp_194_0.86_model.h5,50.0
