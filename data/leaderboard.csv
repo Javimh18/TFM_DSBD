@@ -7,3 +7,4 @@ mediapipe,mp,0.89,0.85,0.85,0.38,0.62,0.43,159.0,src/mediapipe/bestmodels/best_m
 mediapipe,mp,0.93,0.86,0.86,0.24,0.63,0.55,167.0,src/mediapipe/bestmodels/best_mp_167_0.86_model.h5,30.0
 mediapipe,mp,0.92,0.86,0.05,0.25,0.5,13.1,194.0,src/mediapipe/bestmodels/best_mp_194_0.86_model.h5,50.0
 convlstm,simple,0.9,0.85,0.8,0.32,0.52,0.82,127.0,src/convlstm/bestmodels/best_simple_127_0.85_model.h5,30.0
+3DCNN,3dcnn,0.86,0.82,0.86,0.55,0.64,0.6,120.0,src/3DCNN/bestmodels/best_3dcnn_120_0.82_model.h5,20.0
