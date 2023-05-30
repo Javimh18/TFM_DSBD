@@ -13,8 +13,8 @@ class Leaderboard:
     def update_leaderboard(self, history, test_results, model_name, model_type, subset_size):
         # check if the type of the model exists. In that case update that entry on
         # the leader board. If not, create new entry to the dataframe
-        if self.lb['model_type'].eq(model_type).any() and self.lb['model_name'].eq(model_name).any() and self.lb['subset_size'].eq(subset_size).any():
-            row = self.lb.loc[self.lb['model_type'].eq(model_type) & self.lb['model_name'].eq(model_name)]
+        row = self.lb.loc[self.lb['model_type'].eq(model_type) & self.lb['model_name'].eq(model_name) & self.lb['subset_size'].eq(subset_size)] 
+        if len(row) == 1:
             val_acc_epoch = np.argmax(history.history['val_accuracy']) 
             val_acc_max = history.history['val_accuracy'][val_acc_epoch]
             if row['val_acc'].item() < val_acc_max:
@@ -37,7 +37,7 @@ class Leaderboard:
                 self.lb.sort_values('val_acc', axis=0, ascending=False)
 
 
-        else:
+        elif len(row) == 0:
             val_acc_epoch = np.argmax(history.history['val_accuracy'])
             train_acc_max = history.history['accuracy'][val_acc_epoch]
             val_acc_max = history.history['val_accuracy'][val_acc_epoch]
@@ -66,6 +66,9 @@ class Leaderboard:
             # we add the new row to the dataframe and sort the dataframe based on the val_acc
             self.lb.loc[len(self.lb)] = new_row
             self.lb.sort_values('val_acc', axis=0, ascending=False)
+
+        else:
+            print("ERROR: Some condition that was unexpected appeared, review leaderboard.csv")
             
         # we save the updated version of the leaderboard
         self.lb.to_csv(self.path_to_lb, header=True, index=False, mode='w+')
