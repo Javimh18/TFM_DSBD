@@ -8,3 +8,5 @@ mediapipe,mp,0.92,0.86,0.05,0.25,0.5,13.1,194.0,src/mediapipe/bestmodels/best_mp
 3DCNN,3dcnn,0.93,0.92,0.91,0.33,0.37,0.4,132.0,src/3DCNN/bestmodels/best_3dcnn_132_0.92_model.h5,20.0
 convlstm,stateless,0.9,0.94,0.92,0.27,0.24,0.22,63.0,src/convlstm/bestmodels/best_stateless_63_0.94_model.h5,20.0
 convlstm,stateless,0.95,0.92,0.82,0.2,0.26,0.46,93.0,src/convlstm/bestmodels/best_stateless_91_0.92_model.h5,30.0
+convlstm,stateless,0.87,0.77,0.74,0.38,1.05,1.06,104.0,src/convlstm/bestmodels/best_stateless_104_0.77_model.h5,40.0
+convlstm,simple,0.83,0.65,0.65,0.48,1.36,1.27,170.0,src/convlstm/bestmodels/best_simple_170_0.65_model.h5,40.0
