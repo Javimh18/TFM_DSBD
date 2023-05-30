@@ -11,3 +11,5 @@ convlstm,stateless,0.87,0.77,0.74,0.38,1.05,1.06,104.0,src/convlstm/bestmodels/b
 convlstm,simple,0.83,0.65,0.65,0.48,1.36,1.27,170.0,src/convlstm/bestmodels/best_simple_170_0.65_model.h5,40.0
 3DCNN,3dcnn,0.91,0.91,0.88,0.45,0.5,0.57,135.0,src/3DCNN/bestmodels/best_3dcnn_135_0.91_model.h5,40.0
 mediapipe,mp,0.91,0.84,0.04,0.3,0.57,13.18,168.0,src/mediapipe/bestmodels/best_mp_168_0.84_model.h5,50.0
+convlstm,simple,0.94,0.93,0.89,0.15,0.26,0.36,72.0,src/convlstm/bestmodels/best_simple_72_0.93_model.h5,20.0
+convlstm,simple,0.91,0.89,0.85,0.26,0.38,0.52,96.0,src/convlstm/bestmodels/best_simple_96_0.89_model.h5,30.0
