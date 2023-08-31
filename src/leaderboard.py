@@ -28,7 +28,7 @@ class Leaderboard:
                     'val_loss': float("{:.2f}".format(history.history['val_loss'][val_acc_epoch])),
                     'test_loss': float("{:.2f}".format(test_results[0])),
                     'epoch': val_acc_epoch + 1,
-                    'path_to_model': f'src/{model_type}/bestmodels/best_{model_name}_{val_acc_epoch+1}_{val_acc_max:.2f}_model.h5',
+                    'path_to_model': f'src/{model_type}/bestmodels/best_{model_name}_{val_acc_epoch+1}_{val_acc_max:.2f}_{subset_size}_model.h5',
                     'subset_size': subset_size
                 }
                 
@@ -46,7 +46,7 @@ class Leaderboard:
             val_loss_max =  history.history['val_loss'][val_acc_epoch]
             test_loss_max = test_results[0]
             epoch = val_acc_epoch + 1
-            path_to_model =  f'src/{model_type}/bestmodels/best_{model_name}_{epoch}_{val_acc_max:.2f}_model.h5'
+            path_to_model =  f'src/{model_type}/bestmodels/best_{model_name}_{epoch}_{val_acc_max:.2f}_{subset_size}_model.h5'
             subset_size = subset_size
 
             new_row = {
